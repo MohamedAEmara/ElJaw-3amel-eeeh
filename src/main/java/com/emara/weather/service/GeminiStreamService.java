@@ -1,13 +1,13 @@
 package com.emara.weather.service;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.time.Duration;
 
 @Service
 public class GeminiStreamService {
@@ -18,45 +18,45 @@ public class GeminiStreamService {
     @Value("${gemini.stream.url}")
     private String GEMINI_URL;
 
-    public void streamGeminiResponse(String prompt, SseEmitter emitter) {
-        try {
-            // Build URL with API Key
-            String urlStr = GEMINI_URL + "?key=" + apiKey;
-            URL url = new URL(urlStr);
+    private final WebClient webClient;
 
-            // Open connection
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-            conn.setDoOutput(true);
+    public GeminiStreamService() {
+        this.webClient = WebClient.builder()
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024)) // 10MB buffer
+                .build();
+    }
 
-            // Request body
-            String requestBody = "{ \"contents\":[{\"parts\":[{\"text\":\"" + prompt + "\"}]}]}";
-            conn.getOutputStream().write(requestBody.getBytes());
+    public Flux<String> streamGeminiResponse(String prompt) {
+        // Build URL with API Key
+        String urlStr = GEMINI_URL + "?key=" + apiKey;
+        
+        // Request body
+        String requestBody = "{ \"contents\":[{\"parts\":[{\"text\":\"" + prompt + "\"}]}]}";
 
-            // Stream response line by line
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    if (line.contains("\"text\"")) {
-                        // Extract text content from JSON line
-                        line = line.trim();
-                        int start = line.indexOf(":") + 2; // Skip past ':"'
-                        int end = line.lastIndexOf("\"");
-                        if (start < end) {
-                            line = line.substring(start, end);
-                        } else {
-                            line = "";
-                        }
-                        // Send chunk to client
-                        emitter.send(line);
-                    }
-                }
+        return webClient.post()
+                .uri(urlStr)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(requestBody))
+                .retrieve()
+                .bodyToFlux(String.class)
+                .flatMap(this::processResponseLine)
+                .filter(line -> !line.isEmpty())
+                .onErrorResume(throwable -> {
+                    return Flux.just("Error: " + throwable.getMessage());
+                })
+                .timeout(Duration.ofMinutes(5)); // Add timeout for safety
+    }
+
+    private Flux<String> processResponseLine(String line) {
+        if (line.contains("\"text\"")) {
+            line = line.trim();
+            int start = line.indexOf(":") + 2;
+            int end = line.lastIndexOf("\"");
+            if (start < end) {
+                String extractedText = line.substring(start, end);
+                return Flux.just(extractedText);
             }
-
-            emitter.complete();
-        } catch (Exception e) {
-            emitter.completeWithError(e);
         }
+        return Flux.empty(); 
     }
 }

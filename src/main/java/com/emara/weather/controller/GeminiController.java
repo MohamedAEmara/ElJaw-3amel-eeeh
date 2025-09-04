@@ -1,13 +1,15 @@
 package com.emara.weather.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import reactor.core.publisher.Flux;
 
 import com.emara.weather.service.GeminiService;
 import com.emara.weather.service.GeminiStreamService;
@@ -27,14 +29,8 @@ public class GeminiController {
         return geminiService.generateContent(message);
     }
 
-    @GetMapping("/stream")
-    public SseEmitter streamGemini(@RequestParam String prompt) {
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
-
-        new Thread(() -> {
-            geminiStreamService.streamGeminiResponse(prompt, emitter);
-        }).start();
-
-        return emitter;
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_PLAIN_VALUE)
+    public Flux<String> streamGemini(@RequestParam String prompt) {
+        return geminiStreamService.streamGeminiResponse(prompt);
     }
 }
