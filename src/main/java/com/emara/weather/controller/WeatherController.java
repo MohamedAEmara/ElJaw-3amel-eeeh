@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.emara.weather.service.WeatherService;
 
+import reactor.core.publisher.Flux;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,5 +28,10 @@ public class WeatherController {
         }
         System.out.println("Response: " + response);
         return response.getBody().toString();
+    }
+
+    @GetMapping("/recommendations/{cityKey}")
+    public Flux<String> getRecommendations(@PathVariable String cityKey) {
+        return weatherService.getWeatherRecommendations(cityKey);
     }
 }

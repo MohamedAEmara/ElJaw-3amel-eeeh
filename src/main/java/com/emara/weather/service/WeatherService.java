@@ -7,11 +7,18 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import reactor.core.publisher.Flux;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class WeatherService {
     private static String baseUrl = "https://api.openweathermap.org/data/2.5/weather";
+
+    @Autowired
+    GeminiStreamService geminiStreamService;
 
     @Value("${openweathermap.api.key}")
     private String apiKey;
@@ -57,6 +64,18 @@ public class WeatherService {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error fetching weather data");
+        }
+    }
+
+
+    public Flux<String> getWeatherRecommendations(String cityKey) {
+        try {
+            String weatherData = getCityWeather(cityKey).getBody().toString();
+            String prompt = "Based on the following weather data, provide recommendations for outdoor activities and clothing in max 200 words:\n" + weatherData;
+            return geminiStreamService.streamGeminiResponse(prompt);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Flux.just("Error fetching weather recommendations");
         }
     }
 }
