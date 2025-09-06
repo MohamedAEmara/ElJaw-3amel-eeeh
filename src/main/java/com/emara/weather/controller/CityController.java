@@ -21,4 +21,9 @@ public class CityController {
     public List<City> findAllCities() {
         return cityService.findAll();
     }
+
+    @GetMapping("/{id}")
+    public City findCityById(@org.springframework.web.bind.annotation.PathVariable Long id) {
+        return cityService.findById(id);
+    }
 }
