@@ -12,7 +12,7 @@ A comprehensive weather recommendations system for the Egyptian cities built wit
 - **RESTful API**: Clean and intuitive REST endpoints
 
 ## Technologies Used
-[![technologies](https://go-skill-icons.vercel.app/api/icons?i=java,spring,postgres,gemini,git,github,docker&theme=dark)]
+![technologies](https://go-skill-icons.vercel.app/api/icons?i=java,spring,postgres,gemini,git,github,docker&theme=dark)
 
 ## Tech Stack
 
