@@ -11,6 +11,9 @@ A comprehensive weather recommendations system for the Egyptian cities built wit
 - **Database Integration**: PostgreSQL database with Flyway migrations
 - **RESTful API**: Clean and intuitive REST endpoints
 
+## Technologies Used
+[![technologies](https://go-skill-icons.vercel.app/api/icons?i=java,spring,postgres,gemini,git,github,docker&theme=dark)]
+
 ## Tech Stack
 
 - **Backend**: Spring Boot 3.5.5
