@@ -25,5 +25,5 @@ public class City {
     private String governorate;
     private Double lat;
     private Double lon;
-    private String cityKey; // Unique identifier for the city
+    private String cityKey;
 }
