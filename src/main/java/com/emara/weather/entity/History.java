@@ -25,6 +25,6 @@ public class History {
 
     private String content;
 
-    @Column(name = "day")
-    private Date day;
+    @Column(name = "date", insertable = false, updatable = false)
+    private Date date;
 }
