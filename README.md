@@ -8,11 +8,13 @@ A comprehensive weather recommendations system for the Egyptian cities built wit
 - **AI-Powered Recommendations**: Get intelligent weather-based recommendations using Google Gemini AI
 - **City Management**: Support for multiple cities with Arabic and English names
 - **Streaming Responses**: Real-time streaming of AI recommendations
+- **OAuth with Gmail**: Authenticate users with gmail
+- **Daily Quota**: allow only 5 requests / day for every user to "/weather" eandpoints
 - **Database Integration**: PostgreSQL database with Flyway migrations
 - **RESTful API**: Clean and intuitive REST endpoints
 
 ## Technologies Used
-![technologies](https://go-skill-icons.vercel.app/api/icons?i=java,spring,postgres,gemini,git,github,docker&theme=dark)
+![technologies](https://go-skill-icons.vercel.app/api/icons?i=java,spring,postgres,gemini,gmail,git,github,docker&theme=dark)
 
 ## Tech Stack
 
@@ -21,6 +23,7 @@ A comprehensive weather recommendations system for the Egyptian cities built wit
 - **AI Integration**: Google Gemini AI
 - **Weather API**: OpenWeatherMap
 - **Database Migration**: Flyway
+- **OAuth2 Client**: authentication
 - **Build Tool**: Maven
 - **Java Version**: 21
 - **Containerization**: Docker Compose
@@ -40,12 +43,15 @@ You'll need to obtain API keys from:
 
 1. **OpenWeatherMap API**: Get your API key from [OpenWeatherMap](https://openweathermap.org/api)
 2. **Google Gemini API**: Get your API key from [Google AI Studio](https://aistudio.google.com/)
+3. **Google Cloud Platform Console**: Get you API key [Oauth Consent Screen](https://developers.google.com/workspace/guides/configure-oauth-consent)
 
 Update the `src/main/resources/application.properties` file with your API keys:
 
 ```properties
 openweathermap.api.key=YOUR_OPENWEATHERMAP_API_KEY
 gemini.api.key=YOUR_GEMINI_API_KEY
+spring.security.oauth2.client.registration.google.client-id=YOUR_GOOGLE_API_KEY
+spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_API_SECRET
 ```
 
 ## Installation & Setup
@@ -124,6 +130,10 @@ gemini.api.key=your-gemini-api-key
 # Flyway Migration
 spring.flyway.enabled=true
 spring.flyway.locations=classpath:db/migration
+
+# Oauth Configuration
+spring.security.oauth2.client.registration.google.client-id=YOUR_GOOGLE_API_KEY
+spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_API_SECRET
 ```
 
 ## Usage Examples
